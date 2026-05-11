@@ -6,7 +6,9 @@ use App\Http\Controllers\Public\FaqController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\InfosController;
 use App\Http\Controllers\Public\ProgrammeController;
+use App\Http\Controllers\Public\PaymentController;
 use App\Http\Controllers\Public\RegistrationController;
+use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Http\Controllers\Public\SpeakersController;
 use App\Http\Controllers\Public\SponsorsController;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +41,26 @@ Route::post('/inscription', [RegistrationController::class, 'store'])
     ->name('registration.store');
 Route::get('/inscription/{reference}/confirmation', [RegistrationController::class, 'confirmation'])
     ->name('registration.confirmation');
+
+// Paiements
+Route::get('/inscription/{reference}/payment', [PaymentController::class, 'method'])->name('payment.method');
+Route::post('/inscription/{reference}/payment', [PaymentController::class, 'initiate'])
+    ->middleware('throttle:10,1')
+    ->name('payment.initiate');
+Route::get('/inscription/{reference}/payment/cash', [PaymentController::class, 'cashInstructions'])
+    ->name('payment.cash-instructions');
+Route::get('/inscription/{reference}/payment/return', [PaymentController::class, 'return'])
+    ->name('payment.return');
+Route::get('/inscription/{reference}/payment/cancel', [PaymentController::class, 'cancel'])
+    ->name('payment.cancel');
+
+// Webhooks (CSRF exempté via VerifyCsrfToken middleware)
+Route::post('/webhooks/payments/kkiapay', [PaymentWebhookController::class, 'kkiapay'])
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class)
+    ->name('webhooks.kkiapay');
+Route::post('/webhooks/payments/stripe', [PaymentWebhookController::class, 'stripe'])
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class)
+    ->name('webhooks.stripe');
 
 /*
 |--------------------------------------------------------------------------

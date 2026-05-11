@@ -98,17 +98,13 @@ const requiresPayment = props.registration.remaining > 0;
                         <p class="mt-1 text-sm text-muted-foreground">
                             Votre place est réservée. Pour confirmer définitivement votre inscription, procédez au paiement par Mobile Money ou carte bancaire.
                         </p>
-                        <button
-                            type="button"
-                            disabled
-                            class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground opacity-50"
+                        <Link
+                            :href="`/inscription/${registration.reference}/payment`"
+                            class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
                         >
                             <CreditCard class="h-4 w-4" />
-                            Procéder au paiement (disponible bientôt)
-                        </button>
-                        <p class="mt-2 text-xs text-muted-foreground italic">
-                            Le module de paiement Kkiapay / Stripe sera activé dans la prochaine mise à jour.
-                        </p>
+                            Procéder au paiement
+                        </Link>
                     </div>
                 </div>
             </div>
