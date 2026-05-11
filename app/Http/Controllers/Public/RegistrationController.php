@@ -9,11 +9,13 @@ use App\Models\Participant;
 use App\Models\PromoCode;
 use App\Models\Registration;
 use App\Models\RegistrationCategory;
+use App\Mail\RegistrationConfirmed;
 use App\Services\Registrations\PricingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -137,6 +139,13 @@ class RegistrationController extends Controller
                 'user_agent' => substr((string) request()->userAgent(), 0, 240),
             ]);
         });
+
+        // Email de confirmation
+        try {
+            Mail::send(new RegistrationConfirmed($registration));
+        } catch (\Throwable $e) {
+            logger()->warning('Email registration-confirmed failed', ['error' => $e->getMessage()]);
+        }
 
         return redirect()->route('registration.confirmation', $registration->reference);
     }

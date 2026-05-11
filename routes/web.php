@@ -6,6 +6,7 @@ use App\Http\Controllers\Public\FaqController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\InfosController;
 use App\Http\Controllers\Public\ProgrammeController;
+use App\Http\Controllers\Public\ParticipantDownloadController;
 use App\Http\Controllers\Public\PaymentController;
 use App\Http\Controllers\Public\RegistrationController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
@@ -53,6 +54,11 @@ Route::get('/inscription/{reference}/payment/return', [PaymentController::class,
     ->name('payment.return');
 Route::get('/inscription/{reference}/payment/cancel', [PaymentController::class, 'cancel'])
     ->name('payment.cancel');
+
+// Téléchargements participant (signed URL ou email match en query string)
+Route::get('/mon-inscription/{reference}/{type}', ParticipantDownloadController::class)
+    ->where('type', 'badge|invoice')
+    ->name('participant.download');
 
 // Webhooks (CSRF exempté via VerifyCsrfToken middleware)
 Route::post('/webhooks/payments/kkiapay', [PaymentWebhookController::class, 'kkiapay'])

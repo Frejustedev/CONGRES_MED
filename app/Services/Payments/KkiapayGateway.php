@@ -4,10 +4,14 @@ namespace App\Services\Payments;
 
 use App\Models\Payment;
 use App\Models\Registration;
+use App\Mail\PaymentReceived;
 use App\Services\Payments\Contracts\PaymentGateway;
+use App\Services\Pdf\BadgePdfService;
+use App\Services\Pdf\InvoicePdfService;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class KkiapayGateway implements PaymentGateway
@@ -139,6 +143,18 @@ class KkiapayGateway implements PaymentGateway
                 'status' => 'confirmed',
                 'confirmed_at' => now(),
             ]);
+            $this->dispatchPostPayment($registration);
+        }
+    }
+
+    protected function dispatchPostPayment(Registration $registration): void
+    {
+        try {
+            $badgePath = app(BadgePdfService::class)->store($registration);
+            $invoice = app(InvoicePdfService::class)->generateForRegistration($registration->fresh());
+            Mail::send(new PaymentReceived($registration->fresh(), $invoice->pdf_path, $badgePath));
+        } catch (\Throwable $e) {
+            Log::warning('Post-payment dispatch failed', ['registration' => $registration->reference, 'error' => $e->getMessage()]);
         }
     }
 
