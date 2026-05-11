@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Settings\BrandingSettings;
+use App\Settings\EventSettings;
+use App\Settings\ModulesSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -38,10 +41,27 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'auth' => [
+            'auth' => fn () => [
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+
+            // Congresia — config dynamique partagée à toutes les pages Vue
+            'event' => fn () => app(EventSettings::class)->toArray(),
+            'branding' => fn () => app(BrandingSettings::class)->toArray(),
+            'modules' => fn () => app(ModulesSettings::class)->toArray(),
+
+            // i18n
+            'locale' => fn () => app()->getLocale(),
+            'availableLocales' => fn () => ['fr', 'en'],
+
+            // Flash messages
+            'flash' => fn () => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+                'info' => $request->session()->get('info'),
+            ],
         ];
     }
 }

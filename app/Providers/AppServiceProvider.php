@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureLocale();
     }
 
     /**
@@ -46,5 +48,19 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Configure Carbon locale and timezone from app config.
+     */
+    protected function configureLocale(): void
+    {
+        $locale = config('app.locale', 'fr');
+        Carbon::setLocale($locale);
+        CarbonImmutable::setLocale($locale);
+
+        if ($timezone = config('app.timezone')) {
+            date_default_timezone_set($timezone);
+        }
     }
 }
