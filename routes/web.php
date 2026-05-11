@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\AbstractManagementController;
+use App\Http\Controllers\Admin\ContentController as AdminContentController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\GroupRegistrationController;
+use App\Http\Controllers\Admin\RegistrationManagementController;
+use App\Http\Controllers\Admin\VisaLetterController;
 use App\Http\Controllers\Public\AbstractController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\ExhibitorsController;
@@ -109,6 +115,42 @@ Route::post('/webhooks/payments/stripe', [PaymentWebhookController::class, 'stri
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin back-office (admin-orga + super-admin + tresorier selon sections)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', 'role:admin-orga|admin-scientifique|tresorier|super-admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', AdminDashboardController::class)->name('dashboard');
+
+    // Inscriptions
+    Route::get('/registrations', [RegistrationManagementController::class, 'index'])->name('registrations.index');
+    Route::get('/registrations/export', [RegistrationManagementController::class, 'exportCsv'])->name('registrations.export');
+    Route::post('/registrations/{id}/badge', [RegistrationManagementController::class, 'regenerateBadge'])->name('registrations.badge');
+    Route::post('/registrations/{id}/invoice', [RegistrationManagementController::class, 'regenerateInvoice'])->name('registrations.invoice');
+    Route::post('/registrations/{id}/cancel', [RegistrationManagementController::class, 'cancel'])->name('registrations.cancel');
+
+    // Abstracts
+    Route::get('/abstracts', [AbstractManagementController::class, 'index'])->name('abstracts.index');
+    Route::get('/abstracts/{id}', [AbstractManagementController::class, 'show'])->name('abstracts.show');
+    Route::post('/abstracts/{id}/assign-reviewer', [AbstractManagementController::class, 'assignReviewer'])->name('abstracts.assign');
+    Route::post('/abstracts/{id}/decide', [AbstractManagementController::class, 'decide'])->name('abstracts.decide');
+
+    // Content management (sponsors, exhibitors, speakers, sessions, symposiums, rooms)
+    Route::get('/content/{type}', [AdminContentController::class, 'index'])->where('type', 'sponsors|exhibitors|speakers|sessions|symposiums|rooms')->name('content.index');
+    Route::post('/content/{type}', [AdminContentController::class, 'store'])->where('type', 'sponsors|exhibitors|speakers|sessions|symposiums|rooms')->name('content.store');
+    Route::put('/content/{type}/{id}', [AdminContentController::class, 'update'])->where('type', 'sponsors|exhibitors|speakers|sessions|symposiums|rooms')->name('content.update');
+    Route::delete('/content/{type}/{id}', [AdminContentController::class, 'destroy'])->where('type', 'sponsors|exhibitors|speakers|sessions|symposiums|rooms')->name('content.destroy');
+
+    // Groupes (inscriptions groupées institutions)
+    Route::get('/groups', [GroupRegistrationController::class, 'index'])->name('groups.index');
+    Route::post('/groups', [GroupRegistrationController::class, 'store'])->name('groups.store');
+
+    // Visa letters
+    Route::get('/visa-letters', [VisaLetterController::class, 'index'])->name('visa.index');
+    Route::post('/visa-letters/{id}/generate', [VisaLetterController::class, 'generate'])->name('visa.generate');
 });
 
 require __DIR__.'/settings.php';
