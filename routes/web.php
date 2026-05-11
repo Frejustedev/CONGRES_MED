@@ -12,7 +12,9 @@ use App\Http\Controllers\Public\ProgrammeController;
 use App\Http\Controllers\Public\RegistrationController;
 use App\Http\Controllers\Public\SpeakersController;
 use App\Http\Controllers\Public\SponsorsController;
+use App\Http\Controllers\Public\VerifyController;
 use App\Http\Controllers\Reviewer\ReviewController;
+use App\Http\Controllers\Staff\ScanController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -79,6 +81,17 @@ Route::middleware(['auth', 'verified', 'role:reviewer|admin-scientifique|super-a
     Route::get('/reviews/{review}', [ReviewController::class, 'show'])->name('review.show');
     Route::post('/reviews/{review}', [ReviewController::class, 'submit'])->name('review.submit');
 });
+
+// Espace staff Jour J (regisseur + admin-orga + super-admin)
+Route::middleware(['auth', 'verified', 'role:regisseur|admin-orga|super-admin'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/scan', [ScanController::class, 'show'])->name('scan');
+    Route::post('/scan/validate', [ScanController::class, 'validateScan'])
+        ->middleware('throttle:120,1')
+        ->name('scan.validate');
+});
+
+// Vérification publique d'attestation par code
+Route::get('/verify/{code}', VerifyController::class)->name('attestation.verify');
 
 // Webhooks (CSRF exempté via VerifyCsrfToken middleware)
 Route::post('/webhooks/payments/kkiapay', [PaymentWebhookController::class, 'kkiapay'])
