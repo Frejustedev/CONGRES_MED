@@ -1,17 +1,19 @@
 <?php
 
+use App\Http\Controllers\Public\AbstractController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\ExhibitorsController;
 use App\Http\Controllers\Public\FaqController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\InfosController;
-use App\Http\Controllers\Public\ProgrammeController;
 use App\Http\Controllers\Public\ParticipantDownloadController;
 use App\Http\Controllers\Public\PaymentController;
+use App\Http\Controllers\Public\ProgrammeController;
 use App\Http\Controllers\Public\RegistrationController;
-use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Http\Controllers\Public\SpeakersController;
 use App\Http\Controllers\Public\SponsorsController;
+use App\Http\Controllers\Reviewer\ReviewController;
+use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -59,6 +61,24 @@ Route::get('/inscription/{reference}/payment/cancel', [PaymentController::class,
 Route::get('/mon-inscription/{reference}/{type}', ParticipantDownloadController::class)
     ->where('type', 'badge|invoice')
     ->name('participant.download');
+
+// Soumission de résumés (publique, sans compte requis)
+Route::get('/abstracts/submit', [AbstractController::class, 'submitForm'])->name('abstracts.submit');
+Route::post('/abstracts/submit', [AbstractController::class, 'submit'])
+    ->middleware('throttle:5,1')
+    ->name('abstracts.store');
+Route::get('/abstracts/{reference}/submitted', [AbstractController::class, 'submitted'])->name('abstracts.submitted');
+Route::get('/abstracts/lookup', [AbstractController::class, 'lookup'])->name('abstracts.lookup');
+Route::post('/abstracts/lookup', [AbstractController::class, 'lookupSubmit'])
+    ->middleware('throttle:10,1')
+    ->name('abstracts.lookup.submit');
+
+// Espace reviewer (auth + role)
+Route::middleware(['auth', 'verified', 'role:reviewer|admin-scientifique|super-admin'])->prefix('reviewer')->name('reviewer.')->group(function () {
+    Route::get('/', [ReviewController::class, 'dashboard'])->name('dashboard');
+    Route::get('/reviews/{review}', [ReviewController::class, 'show'])->name('review.show');
+    Route::post('/reviews/{review}', [ReviewController::class, 'submit'])->name('review.submit');
+});
 
 // Webhooks (CSRF exempté via VerifyCsrfToken middleware)
 Route::post('/webhooks/payments/kkiapay', [PaymentWebhookController::class, 'kkiapay'])
