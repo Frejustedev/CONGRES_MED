@@ -150,16 +150,17 @@ class DemoEventSeeder extends Seeder
         $settings->name = $event->name;
         $settings->tagline = $event->tagline ?? '';
         $settings->theme = $event->theme;
-        $settings->start_date = $event->starts_at;
-        $settings->end_date = $event->ends_at;
+        $toDateTime = fn ($d) => $d ? \DateTime::createFromImmutable($d instanceof \DateTimeImmutable ? $d : \DateTimeImmutable::createFromInterface($d)) : null;
+        $settings->start_date = $toDateTime($event->starts_at);
+        $settings->end_date = $toDateTime($event->ends_at);
         $settings->timezone = $event->timezone;
         $settings->venue_name = $event->venue_name;
         $settings->venue_city = $event->venue_city;
         $settings->venue_country = $event->venue_country;
-        $settings->registration_open_at = $event->registration_opens_at;
-        $settings->registration_close_at = $event->registration_closes_at;
-        $settings->abstracts_open_at = $event->abstracts_open_at;
-        $settings->abstracts_close_at = $event->abstracts_close_at;
+        $settings->registration_open_at = $toDateTime($event->registration_opens_at);
+        $settings->registration_close_at = $toDateTime($event->registration_closes_at);
+        $settings->abstracts_open_at = $toDateTime($event->abstracts_open_at);
+        $settings->abstracts_close_at = $toDateTime($event->abstracts_close_at);
         $settings->save();
 
         $this->command->info(sprintf(
