@@ -1,15 +1,11 @@
 /.phpunit.cache
 /bootstrap/ssr
 /node_modules
-/public/build
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
 /storage/*.key
 /storage/pail
-/resources/js/actions
-/resources/js/routes
-/resources/js/wayfinder
 /vendor
 .DS_Store
 .env
@@ -27,3 +23,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Note: /public/build et resources/js/{actions,routes,wayfinder} sont commités
+# pour permettre le déploiement sur hébergeur sans Node (ex: o2switch).
+# Le build de prod doit être lancé en local avant chaque push :
+#   npm run build && git add -A && git commit
