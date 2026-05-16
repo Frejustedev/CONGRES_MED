@@ -57,6 +57,9 @@ class HandleInertiaRequests extends Middleware
             'locale' => fn () => app()->getLocale(),
             'availableLocales' => fn () => ['fr', 'en'],
 
+            // Turnstile site key (vide = mode dev sans captcha)
+            'turnstile_site_key' => fn () => env('TURNSTILE_SITE_KEY', ''),
+
             // Flash messages
             'flash' => fn () => [
                 'success' => $request->session()->get('success'),

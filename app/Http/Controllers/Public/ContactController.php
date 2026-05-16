@@ -31,7 +31,7 @@ class ContactController extends Controller
             'email' => ['required', 'email', 'max:160'],
             'subject' => ['required', 'string', 'max:200'],
             'message' => ['required', 'string', 'min:10', 'max:5000'],
-            'cf-turnstile-response' => ['nullable', 'string'],
+            'cf-turnstile-response' => ['nullable', 'string', new \App\Rules\TurnstileRule()],
         ]);
 
         // TODO Phase 5+ : envoyer le mail via Notifications + stocker en BDD

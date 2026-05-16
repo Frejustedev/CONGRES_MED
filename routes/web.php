@@ -1,17 +1,23 @@
 <?php
 
 use App\Http\Controllers\Admin\AbstractManagementController;
+use App\Http\Controllers\Admin\BookletController;
 use App\Http\Controllers\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\GroupRegistrationController;
 use App\Http\Controllers\Admin\NewsManagementController;
 use App\Http\Controllers\Admin\RegistrationManagementController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\SurveyDashboardController;
 use App\Http\Controllers\Admin\VisaLetterController;
 use App\Http\Controllers\Public\AbstractController;
+use App\Http\Controllers\Public\CmeQuizController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\LegalController;
 use App\Http\Controllers\Public\NewsController;
+use App\Http\Controllers\Public\SurveyController;
+use App\Http\Controllers\Public\SymposiumController;
 use App\Http\Controllers\Public\ExhibitorsController;
 use App\Http\Controllers\Public\FaqController;
 use App\Http\Controllers\Public\HomeController;
@@ -36,6 +42,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('/programme', ProgrammeController::class)->name('programme.index');
+Route::get('/programme/{slug}', [ProgrammeController::class, 'show'])->name('programme.show');
 Route::get('/intervenants', SpeakersController::class)->name('speakers.index');
 Route::get('/sponsors', SponsorsController::class)->name('sponsors.index');
 Route::get('/exposants', ExhibitorsController::class)->name('exhibitors.index');
@@ -54,6 +61,26 @@ Route::get('/mentions-legales', [LegalController::class, 'mentions'])->name('leg
 // Actualités publiques
 Route::get('/actualites', [NewsController::class, 'index'])->name('news.index');
 Route::get('/actualites/{slug}', [NewsController::class, 'show'])->name('news.show');
+
+// Symposiums satellites
+Route::get('/symposiums', [SymposiumController::class, 'index'])->name('symposiums.index');
+Route::get('/symposiums/{slug}', [SymposiumController::class, 'show'])->name('symposiums.show');
+Route::post('/symposiums/{slug}/register', [SymposiumController::class, 'register'])
+    ->middleware('throttle:10,1')
+    ->name('symposiums.register');
+
+// Sondage post-événement (signed URL via email)
+Route::get('/sondage/{reference}', [SurveyController::class, 'form'])->name('survey.form');
+Route::post('/sondage/{reference}', [SurveyController::class, 'submit'])
+    ->middleware('throttle:3,1')
+    ->name('survey.submit');
+Route::get('/sondage-merci', [SurveyController::class, 'thanks'])->name('survey.thanks');
+
+// CME Quiz (validation crédits)
+Route::get('/cme/quiz/{sessionId}', [CmeQuizController::class, 'show'])->name('cme.quiz.show');
+Route::post('/cme/quiz/{sessionId}', [CmeQuizController::class, 'submit'])
+    ->middleware('throttle:5,1')
+    ->name('cme.quiz.submit');
 
 // Inscriptions congres (wizard public)
 Route::get('/inscription', [RegistrationController::class, 'index'])->name('registration.index');
@@ -185,6 +212,18 @@ Route::middleware(['auth', 'verified', 'role:admin-orga|admin-scientifique|treso
     Route::get('/news/{id}/edit', [NewsManagementController::class, 'edit'])->name('news.edit');
     Route::put('/news/{id}', [NewsManagementController::class, 'update'])->name('news.update');
     Route::delete('/news/{id}', [NewsManagementController::class, 'destroy'])->name('news.destroy');
+
+    // Livret PDF abstracts
+    Route::get('/abstracts/booklet', BookletController::class)->name('abstracts.booklet');
+
+    // Email templates
+    Route::get('/email-templates', [EmailTemplateController::class, 'index'])->name('email-templates.index');
+    Route::post('/email-templates', [EmailTemplateController::class, 'store'])->name('email-templates.store');
+    Route::get('/email-templates/{id}/edit', [EmailTemplateController::class, 'edit'])->name('email-templates.edit');
+    Route::put('/email-templates/{id}', [EmailTemplateController::class, 'update'])->name('email-templates.update');
+
+    // Sondage satisfaction
+    Route::get('/surveys', SurveyDashboardController::class)->name('surveys.dashboard');
 });
 
 require __DIR__.'/settings.php';

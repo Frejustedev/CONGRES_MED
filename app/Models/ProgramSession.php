@@ -33,6 +33,9 @@ class ProgramSession extends Model
             'topics' => 'array',
             'tags' => 'array',
             'cme_credits' => 'integer',
+            'quiz_questions' => 'array',
+            'quiz_required_for_cme' => 'boolean',
+            'quiz_pass_threshold' => 'integer',
         ];
     }
 

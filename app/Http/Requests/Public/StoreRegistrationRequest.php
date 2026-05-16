@@ -47,6 +47,9 @@ class StoreRegistrationRequest extends FormRequest
             'newsletter_optin' => ['boolean'],
             'directory_optin' => ['boolean'],
             'terms_accepted' => ['accepted'],
+
+            // Captcha Cloudflare Turnstile
+            'cf-turnstile-response' => ['nullable', 'string', new \App\Rules\TurnstileRule()],
         ];
     }
 
