@@ -4,12 +4,14 @@ use App\Http\Controllers\Admin\AbstractManagementController;
 use App\Http\Controllers\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GroupRegistrationController;
+use App\Http\Controllers\Admin\NewsManagementController;
 use App\Http\Controllers\Admin\RegistrationManagementController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\VisaLetterController;
 use App\Http\Controllers\Public\AbstractController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\LegalController;
+use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\ExhibitorsController;
 use App\Http\Controllers\Public\FaqController;
 use App\Http\Controllers\Public\HomeController;
@@ -48,6 +50,10 @@ Route::post('/contact', [ContactController::class, 'send'])
 Route::get('/cgv', [LegalController::class, 'terms'])->name('legal.terms');
 Route::get('/confidentialite', [LegalController::class, 'privacy'])->name('legal.privacy');
 Route::get('/mentions-legales', [LegalController::class, 'mentions'])->name('legal.mentions');
+
+// Actualités publiques
+Route::get('/actualites', [NewsController::class, 'index'])->name('news.index');
+Route::get('/actualites/{slug}', [NewsController::class, 'show'])->name('news.show');
 
 // Inscriptions congres (wizard public)
 Route::get('/inscription', [RegistrationController::class, 'index'])->name('registration.index');
@@ -170,6 +176,15 @@ Route::middleware(['auth', 'verified', 'role:admin-orga|admin-scientifique|treso
     Route::put('/settings/payment', [AdminSettingsController::class, 'updatePayment'])->name('settings.payment.update');
     Route::get('/settings/mail', [AdminSettingsController::class, 'mail'])->name('settings.mail');
     Route::put('/settings/mail', [AdminSettingsController::class, 'updateMail'])->name('settings.mail.update');
+    Route::post('/settings/branding/apply-preset', [AdminSettingsController::class, 'applyPreset'])->name('settings.branding.preset');
+
+    // News (actualités back-office)
+    Route::get('/news', [NewsManagementController::class, 'index'])->name('news.index');
+    Route::get('/news/create', [NewsManagementController::class, 'create'])->name('news.create');
+    Route::post('/news', [NewsManagementController::class, 'store'])->name('news.store');
+    Route::get('/news/{id}/edit', [NewsManagementController::class, 'edit'])->name('news.edit');
+    Route::put('/news/{id}', [NewsManagementController::class, 'update'])->name('news.update');
+    Route::delete('/news/{id}', [NewsManagementController::class, 'destroy'])->name('news.destroy');
 });
 
 require __DIR__.'/settings.php';
