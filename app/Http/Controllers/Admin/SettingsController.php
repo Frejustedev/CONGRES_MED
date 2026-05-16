@@ -67,7 +67,32 @@ class SettingsController extends Controller
     {
         return Inertia::render('Admin/Settings/Branding', [
             'settings' => $this->serializeSettings(app(BrandingSettings::class)),
+            'presets' => config('theme_presets'),
         ]);
+    }
+
+    public function applyPreset(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'preset' => ['required', 'string'],
+        ]);
+
+        $presets = config('theme_presets');
+        $preset = $presets[$validated['preset']] ?? null;
+        if (! $preset) {
+            return back()->withErrors(['preset' => 'Preset introuvable.']);
+        }
+
+        $settings = app(BrandingSettings::class);
+        foreach ($preset['colors'] as $key => $value) {
+            $settings->{$key} = $value;
+        }
+        foreach ($preset['fonts'] as $key => $value) {
+            $settings->{$key} = $value;
+        }
+        $settings->save();
+
+        return back()->with('success', "Thème « {$preset['name']} » appliqué.");
     }
 
     public function updateBranding(Request $request): RedirectResponse

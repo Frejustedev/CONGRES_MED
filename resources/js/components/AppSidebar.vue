@@ -21,6 +21,7 @@ import {
     Stamp,
     ScanLine,
     Microscope,
+    Newspaper,
 } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -60,6 +61,7 @@ const adminNavItems = computed<NavItem[]>(() => {
     if (has('abstracts.view-all')) items.push({ title: 'Résumés', href: '/admin/abstracts', icon: FileText });
     if (has('registrations.invite-groups')) items.push({ title: 'Groupes', href: '/admin/groups', icon: UserPlus });
     if (has('registrations.issue-visa-letter')) items.push({ title: 'Lettres visa', href: '/admin/visa-letters', icon: Stamp });
+    if (isAdmin.value) items.push({ title: 'Actualités', href: '/admin/news', icon: Newspaper });
     return items;
 });
 
