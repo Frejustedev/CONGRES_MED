@@ -5,9 +5,11 @@ use App\Http\Controllers\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GroupRegistrationController;
 use App\Http\Controllers\Admin\RegistrationManagementController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\VisaLetterController;
 use App\Http\Controllers\Public\AbstractController;
 use App\Http\Controllers\Public\ContactController;
+use App\Http\Controllers\Public\LegalController;
 use App\Http\Controllers\Public\ExhibitorsController;
 use App\Http\Controllers\Public\FaqController;
 use App\Http\Controllers\Public\HomeController;
@@ -41,6 +43,11 @@ Route::get('/contact', [ContactController::class, 'index'])->name('contact.index
 Route::post('/contact', [ContactController::class, 'send'])
     ->middleware('throttle:5,1')
     ->name('contact.send');
+
+// Pages légales
+Route::get('/cgv', [LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/confidentialite', [LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/mentions-legales', [LegalController::class, 'mentions'])->name('legal.mentions');
 
 // Inscriptions congres (wizard public)
 Route::get('/inscription', [RegistrationController::class, 'index'])->name('registration.index');
@@ -151,6 +158,18 @@ Route::middleware(['auth', 'verified', 'role:admin-orga|admin-scientifique|treso
     // Visa letters
     Route::get('/visa-letters', [VisaLetterController::class, 'index'])->name('visa.index');
     Route::post('/visa-letters/{id}/generate', [VisaLetterController::class, 'generate'])->name('visa.generate');
+
+    // Settings (configuration globale du congrès depuis l'admin)
+    Route::get('/settings/event', [AdminSettingsController::class, 'event'])->name('settings.event');
+    Route::put('/settings/event', [AdminSettingsController::class, 'updateEvent'])->name('settings.event.update');
+    Route::get('/settings/branding', [AdminSettingsController::class, 'branding'])->name('settings.branding');
+    Route::put('/settings/branding', [AdminSettingsController::class, 'updateBranding'])->name('settings.branding.update');
+    Route::get('/settings/modules', [AdminSettingsController::class, 'modules'])->name('settings.modules');
+    Route::put('/settings/modules', [AdminSettingsController::class, 'updateModules'])->name('settings.modules.update');
+    Route::get('/settings/payment', [AdminSettingsController::class, 'payment'])->name('settings.payment');
+    Route::put('/settings/payment', [AdminSettingsController::class, 'updatePayment'])->name('settings.payment.update');
+    Route::get('/settings/mail', [AdminSettingsController::class, 'mail'])->name('settings.mail');
+    Route::put('/settings/mail', [AdminSettingsController::class, 'updateMail'])->name('settings.mail.update');
 });
 
 require __DIR__.'/settings.php';
